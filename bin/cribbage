@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+$LOAD_PATH << File.expand_path('../../lib', __FILE__)
+
+require 'cribbage'
+
+def wait_to_continue
+  print "Press Enter to continue "
+  gets
+end
+
+peek = false
+
+cribbage = Cribbage.new
+
+puts "Cut"
+puts "==="
+puts
+puts cribbage.display_initial_cut
+wait_to_continue
+puts `clear`
+
+playing = true
+while playing
+  puts `clear`
+  puts "Round: #{cribbage.round}"
+  puts "Stage: #{cribbage.stage}"
+  puts cribbage.display_board
+
+  if cribbage.stage != 'The Deal'
+    puts
+    puts "Player 1"
+    puts cribbage.display_hand(0)
+    if peek
+      puts
+      puts "Player 2"
+      puts cribbage.display_hand(1)
+    end
+  end
+
+  wait_to_continue
+  cribbage.proceed
+end

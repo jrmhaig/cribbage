@@ -16,8 +16,12 @@ class Cribbage
         end
       end
 
-      # Do they want to be pre-shuffled?
-      @cards.shuffle!
+      ## Do they want to be pre-shuffled?
+      #@cards.shuffle!
+    end
+
+    def deal
+      @cards.shift
     end
   end
 end
