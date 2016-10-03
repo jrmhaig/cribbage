@@ -12,9 +12,9 @@ class Cribbage
 
     @@face_rank = {
       ace: 1,
-      jack: 10,
-      queen: 11,
-      king: 12
+      jack: 11,
+      queen: 12,
+      king: 13
     }
 
     def initialize value, suit

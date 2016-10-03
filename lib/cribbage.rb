@@ -3,22 +3,27 @@ require 'cribbage/deck'
 class Cribbage
   DEAL = 0
   CRIB = 1
-  #STARTER = 2
+  STARTER = 2
   #PLAY = 3
   #SHOW = 4
   STAGES = [
     'The Deal',
-    'The Crib'
+    'The Crib',
+    'The Starter'
   ]
 
   attr_reader :hand
   attr_reader :round
+  attr_reader :starter
+  attr_reader :score
 
   def initialize
     @deck = Cribbage::Deck.new
     @stage = DEAL
     @round = 1
-    @hand = [[], []]
+    @hand = [[], [], []]
+    @score = [0, 0]
+    @last_score = [0, 0]
     #@dealer = rand(2) # TODO Do this by cutting the deck
 
     # Cut for deal
@@ -35,18 +40,60 @@ class Cribbage
     #@dealer = 1
   end
 
+  def screen
+    puts `clear`
+    puts "Round: #{round}"
+    puts "Dealer: #{@dealer + 1} (you are player 1)"
+    puts "Stage: #{stage}"
+    puts display_board
+    puts
+    if @starter
+      puts "Starter:   -----\n"
+      puts "          | %-2s  |\n" % @starter.short_rank
+      puts "          |   %s |\n" % @starter.suit[0].upcase
+      puts "           ----- \n"
+      puts
+    end
+  end
+
   def display_board
-    <<BOARD
+    board = <<BOARD
               1     1     2     2     3     3     4     4     5     5     6
         5     0     5     0     5     0     5     0     5     0     5     0
-1 o ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... .....
-2 o ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... .....
+BOARD
 
-2 o ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... .....
-1 o ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... .....
+    lines = [
+      "1 . ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... .....\n",
+      "2 . ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... .....\n",
+      "2 . ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... .....\n",
+      "1 . ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... .....\n"
+    ]
+    [0,1].each do |i|
+      if @score[i] == 0 && @last_score[i] == 0
+        lines[i][2] = 'o'
+        lines[3-i][2] = 'o'
+      else
+        if @last_score[i] <= 60
+          lines[i][2 + @last_score[i] + ((@last_score[i] + 4) / 5)] = 'o'
+        end
+        if @score[i] <= 60
+          lines[i][2 + @score[i] + ((@score[i] + 4) / 5)] = 'o'
+        end
+      end
+    end
+
+    board += lines[0]
+    board += lines[1]
+    board += "\n"
+    board += lines[2]
+    board += lines[3]
+
+    board += <<BOARD
     0     5     0     5     0     5     0     5     0     5     0     5
     2     1     1     0     0     9     9     8     8     7     7     6
 BOARD
+
+    board
   end
 
   def display_initial_cut
@@ -71,12 +118,16 @@ CUT
   def proceed
     case @stage
     when DEAL
-      @hand = [[], []]
+      @hand = [[], [], []]
       6.times do
         @hand[1 - @dealer] << @deck.deal
         @hand[@dealer] << @deck.deal
       end
       @stage = CRIB
+    when CRIB
+      @starter = @deck.cards.sample
+      @score[@dealer] += 2 if @starter.rank == :jack
+      @stage = STARTER
     end
   end
 
@@ -96,5 +147,13 @@ CUT
     h += ([" ----- "] * @hand[player].count).join(' ') + "\n"
     h += '   ' + count.join('       ') + "\n"
     h
+  end
+
+  def move_to_crib options
+    p = options[:player]
+    # From highest to lowest
+    options[:cards].sort.reverse.each do |c|
+      @hand[2] << @hand[p].delete_at(c-1)
+    end
   end
 end

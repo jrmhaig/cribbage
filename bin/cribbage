@@ -12,6 +12,7 @@ peek = false
 
 cribbage = Cribbage.new
 
+puts `clear`
 puts "Cut"
 puts "==="
 puts
@@ -21,20 +22,56 @@ puts `clear`
 
 playing = true
 while playing
-  puts `clear`
-  puts "Round: #{cribbage.round}"
-  puts "Stage: #{cribbage.stage}"
-  puts cribbage.display_board
+  # Possibly don't want this line here
+  cribbage.screen
 
-  if cribbage.stage != 'The Deal'
-    puts
-    puts "Player 1"
-    puts cribbage.display_hand(0)
-    if peek
-      puts
-      puts "Player 2"
-      puts cribbage.display_hand(1)
+  #if cribbage.stage != 'The Deal'
+  #  puts
+  #  puts "Player 1"
+  #  puts cribbage.display_hand(0)
+  #  if peek
+  #    puts
+  #    puts "Player 2"
+  #    puts cribbage.display_hand(1)
+  #  end
+  #end
+
+  case cribbage.stage
+  when 'The Deal'
+    cribbage.screen
+  when 'The Crib'
+    crib = []
+    while crib.length < 2
+      cribbage.screen
+      puts 'Choose cards for the crib'
+      puts cribbage.display_hand(0)
+      puts "Chosen: #{crib[0]} (enter 'X' to cancel)" if crib.length > 0
+
+      print "#{1 + crib.length}> "
+      c = gets
+      if c[0] == 'x' || c[0] == 'X'
+        crib = []
+      else
+        c = c.to_i
+        if c >= 1 && c <=6 && (crib.length == 0 || c != crib[0])
+          crib << c
+        end
+      end
     end
+
+    cribbage.screen
+    puts cribbage.display_hand(0)
+    puts "Cards for the crib: #{crib.join(' & ')}"
+
+    cribbage.move_to_crib(player: 0, cards: crib)
+    # TODO Make the computer more clever than just picking two cards at random
+    cribbage.move_to_crib(player: 1, cards: (1..6).to_a.shuffle[0,2])
+  when 'The Starter'
+    cribbage.screen
+    puts "Two for his heels\n" if cribbage.starter.rank == :jack
+  else
+    cribbage.screen
+    puts "Not done yet!"
   end
 
   wait_to_continue

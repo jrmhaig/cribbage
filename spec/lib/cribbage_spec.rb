@@ -1,6 +1,7 @@
 require 'cribbage'
 
 RSpec.describe Cribbage do
+
   context 'at the start of the game' do
     let(:cribbage) { Cribbage.new }
 
@@ -95,6 +96,94 @@ BOARD
         expect(cribbage.hand[1].uniq.length).to eq 6
       end
     end
+
+    describe '#proceed' do
+      it 'moves from crib to starter' do
+        expect{cribbage.proceed}.to change(cribbage, :stage).from('The Crib').to('The Starter')
+      end
+
+      it 'remains on round 1 when moving to the next stage' do
+        expect{cribbage.proceed}.to change(cribbage, :round).by 0
+      end
+
+      it 'sets the starter' do
+        expect{cribbage.proceed}.to change(cribbage, :starter).from(NilClass).to Cribbage::Card
+      end
+
+      context 'all jacks' do
+        # Rig the deck
+        let(:rigged_deck) { Cribbage::Deck.new }
+
+        before(:each) do
+          rigged_deck.instance_variable_set(:@cards, [
+            Cribbage::Card.new(:jack, :spades),
+            Cribbage::Card.new(:jack, :hearts),
+            Cribbage::Card.new(:jack, :diamonds),
+            Cribbage::Card.new(:jack, :clubs)
+          ])
+          cribbage.instance_variable_set(:@deck, rigged_deck)
+        end
+
+        it 'scores two for his heels for player 1' do
+          cribbage.instance_variable_set(:@dealer, 0)
+          # Would be nice to be able to do this by 'change'
+          s1 = cribbage.score[0]
+          s2 = cribbage.score[1]
+          cribbage.proceed
+          expect(cribbage.score[0]).to eq s1 + 2
+          expect(cribbage.score[1]).to eq s2
+        end
+
+        it 'scores two for his heels for player 2' do
+          cribbage.instance_variable_set(:@dealer, 1)
+          # Would be nice to be able to do this by 'change'
+          s1 = cribbage.score[0]
+          s2 = cribbage.score[1]
+          cribbage.proceed
+          expect(cribbage.score[0]).to eq s1
+          expect(cribbage.score[1]).to eq s2 + 2
+        end
+      end
+
+      context 'no jacks' do
+        # Rig the deck
+        let(:rigged_deck) { Cribbage::Deck.new }
+
+        before(:each) do
+          rigged_deck.instance_variable_set(:@cards, [
+            Cribbage::Card.new(2, :spades),
+            Cribbage::Card.new(4, :hearts),
+            Cribbage::Card.new(5, :diamonds),
+            Cribbage::Card.new(6, :clubs)
+          ])
+          cribbage.instance_variable_set(:@deck, rigged_deck)
+        end
+
+        it 'does not score for player 1' do
+          cribbage.instance_variable_set(:@dealer, 0)
+          # Would be nice to be able to do this by 'change'
+          s1 = cribbage.score[0]
+          s2 = cribbage.score[1]
+          cribbage.proceed
+          expect(cribbage.score[0]).to eq s1
+          expect(cribbage.score[1]).to eq s2
+        end
+
+        it 'does not score for player 2' do
+          cribbage.instance_variable_set(:@dealer, 1)
+          # Would be nice to be able to do this by 'change'
+          s1 = cribbage.score[0]
+          s2 = cribbage.score[1]
+          cribbage.proceed
+          expect(cribbage.score[0]).to eq s1
+          expect(cribbage.score[1]).to eq s2
+        end
+      end
+    end
+  end
+
+  context 'at the starter' do
+    # To do
   end
 
   context 'set the dealing player' do
@@ -161,7 +250,8 @@ BOARD
           Cribbage::Card.new(:ace, :clubs),
           Cribbage::Card.new(:queen, :diamonds),
           Cribbage::Card.new(5, :diamonds)
-        ]
+        ],
+        []
       ])
     end
 
@@ -184,6 +274,114 @@ HAND
  -----   -----   -----   -----   -----   ----- 
    1       2       3       4       5       6
 HAND
+    end
+  end
+
+  describe '#move_to_crib' do
+    let(:cribbage) { Cribbage.new }
+
+    before(:each) do
+      cribbage.instance_variable_set(:@hand, [
+        [
+          Cribbage::Card.new(2, :hearts),
+          Cribbage::Card.new(3, :spades),
+          Cribbage::Card.new(5, :spades),
+          Cribbage::Card.new(10, :clubs),
+          Cribbage::Card.new(:jack, :hearts),
+          Cribbage::Card.new(:king, :diamonds)
+        ],
+        [
+          Cribbage::Card.new(5, :clubs),
+          Cribbage::Card.new(5, :spades),
+          Cribbage::Card.new(5, :hearts),
+          Cribbage::Card.new(:ace, :clubs),
+          Cribbage::Card.new(:queen, :diamonds),
+          Cribbage::Card.new(5, :diamonds)
+        ],
+        []
+      ])
+    end
+
+    it 'removes cards from the first players hand' do
+      expect{cribbage.move_to_crib(player: 0, cards: [2,3])}.to change(cribbage.hand[0], :length).by -2
+    end
+
+    it 'removes cards from the second players hand' do
+      expect{cribbage.move_to_crib(player: 1, cards: [2,3])}.to change(cribbage.hand[1], :length).by -2
+    end
+
+    it 'removes the 10 of clubs and jack of hearts from the first players hand' do
+      cribbage.move_to_crib(player: 0, cards: [4,5])
+      # Note, the includes matcher uses the include? method, which uses ==
+      [Cribbage::Card.new(10, :clubs), Cribbage::Card.new(:jack, :hearts)].each do |c|
+        expect(cribbage.hand[0].index{ |a| a.eql? c }).to be_nil
+      end
+    end
+
+    it 'removes the 5 of hearts and queen of diamonds from the second players hand' do
+      cribbage.move_to_crib(player: 1, cards: [3,5])
+      # Note, the includes matcher uses the include? method, which uses ==
+      [Cribbage::Card.new(5, :hearts), Cribbage::Card.new(:queen, :diamonds)].each do |c|
+        expect(cribbage.hand[1].index{ |a| a.eql? c }).to be_nil
+      end
+    end
+
+    it 'adds the first players cards to the crib' do
+      expect{cribbage.move_to_crib(player: 0, cards: [2,3])}.to change(cribbage.hand[2], :length).by 2
+    end
+
+    it 'adds the 10 of clubs and jack of hearts from the first players hand to the crib' do
+      cribbage.move_to_crib(player: 0, cards: [4,5])
+      # Note, the includes matcher uses the include? method, which uses ==
+      [Cribbage::Card.new(10, :clubs), Cribbage::Card.new(:jack, :hearts)].each do |c|
+        expect(cribbage.hand[2].index{ |a| a.eql? c }).not_to be_nil
+      end
+    end
+
+    it 'adds the second players cards to the crib' do
+      expect{cribbage.move_to_crib(player: 1, cards: [2,3])}.to change(cribbage.hand[2], :length).by 2
+    end
+
+    it 'adds the 5 of hearts and queen of diamonds from the second players hand to the crib' do
+      cribbage.move_to_crib(player: 1, cards: [3,5])
+      # Note, the includes matcher uses the include? method, which uses ==
+      [Cribbage::Card.new(5, :hearts), Cribbage::Card.new(:queen, :diamonds)].each do |c|
+        expect(cribbage.hand[2].index{ |a| a.eql? c }).not_to be_nil
+      end
+    end
+  end
+
+  describe '#display_board' do
+    let(:cribbage) { Cribbage.new }
+
+    it 'displays the board with zero score' do
+      expect(cribbage.display_board).to eq <<BOARD
+              1     1     2     2     3     3     4     4     5     5     6
+        5     0     5     0     5     0     5     0     5     0     5     0
+1 o ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... .....
+2 o ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... .....
+
+2 o ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... .....
+1 o ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... .....
+    0     5     0     5     0     5     0     5     0     5     0     5
+    2     1     1     0     0     9     9     8     8     7     7     6
+BOARD
+    end
+
+    it 'displays the board with the score 10, 25 with the previous score 8, 16' do
+      cribbage.instance_variable_set(:@score, [10, 25])
+      cribbage.instance_variable_set(:@last_score, [8, 16])
+      expect(cribbage.display_board).to eq <<BOARD
+              1     1     2     2     3     3     4     4     5     5     6
+        5     0     5     0     5     0     5     0     5     0     5     0
+1 . ..... ..o.o ..... ..... ..... ..... ..... ..... ..... ..... ..... .....
+2 . ..... ..... ..... o.... ....o ..... ..... ..... ..... ..... ..... .....
+
+2 . ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... .....
+1 . ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... ..... .....
+    0     5     0     5     0     5     0     5     0     5     0     5
+    2     1     1     0     0     9     9     8     8     7     7     6
+BOARD
     end
   end
 end

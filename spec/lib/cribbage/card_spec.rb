@@ -73,27 +73,35 @@ RSpec.describe Cribbage::Card do
     end
 
     it 'ace is lower than a number' do
-      expect(Cribbage::Card.new(:ace, :spaces)).to be < Cribbage::Card.new(5, :diamonds)
+      expect(Cribbage::Card.new(:ace, :spades)).to be < Cribbage::Card.new(5, :diamonds)
     end
 
     it 'number is not lower than an ace' do
-      expect(Cribbage::Card.new(5, :spaces)).not_to be < Cribbage::Card.new(:ace, :diamonds)
+      expect(Cribbage::Card.new(5, :spades)).not_to be < Cribbage::Card.new(:ace, :diamonds)
     end
 
     it 'number is lower than a jack' do
-      expect(Cribbage::Card.new(6, :spaces)).to be < Cribbage::Card.new(:jack, :diamonds)
+      expect(Cribbage::Card.new(6, :spades)).to be < Cribbage::Card.new(:jack, :diamonds)
     end
 
     it 'jack is not lower than a number' do
-      expect(Cribbage::Card.new(:jack, :spaces)).not_to be < Cribbage::Card.new(6, :diamonds)
+      expect(Cribbage::Card.new(:jack, :spades)).not_to be < Cribbage::Card.new(6, :diamonds)
+    end
+
+    it '10 is lower than a jack' do
+      expect(Cribbage::Card.new(10, :spades)).to be < Cribbage::Card.new(:jack, :diamonds)
+    end
+
+    it 'jack is not lower than 10' do
+      expect(Cribbage::Card.new(:jack, :spades)).not_to be < Cribbage::Card.new(10, :diamonds)
     end
 
     it 'jack is lower than a queen' do
-      expect(Cribbage::Card.new(:jack, :spaces)).to be < Cribbage::Card.new(:queen, :diamonds)
+      expect(Cribbage::Card.new(:jack, :spades)).to be < Cribbage::Card.new(:queen, :diamonds)
     end
 
     it 'queen is lower than a king' do
-      expect(Cribbage::Card.new(:jack, :spaces)).to be < Cribbage::Card.new(:queen, :diamonds)
+      expect(Cribbage::Card.new(:jack, :spades)).to be < Cribbage::Card.new(:queen, :diamonds)
     end
   end
 
@@ -130,27 +138,35 @@ RSpec.describe Cribbage::Card do
     end
 
     it 'ace is not higher than a number' do
-      expect(Cribbage::Card.new(:ace, :spaces)).not_to be > Cribbage::Card.new(5, :diamonds)
+      expect(Cribbage::Card.new(:ace, :spades)).not_to be > Cribbage::Card.new(5, :diamonds)
     end
 
     it 'number is higher than an ace' do
-      expect(Cribbage::Card.new(5, :spaces)).to be > Cribbage::Card.new(:ace, :diamonds)
+      expect(Cribbage::Card.new(5, :spades)).to be > Cribbage::Card.new(:ace, :diamonds)
     end
 
     it 'number is not higher than a jack' do
-      expect(Cribbage::Card.new(6, :spaces)).not_to be > Cribbage::Card.new(:jack, :diamonds)
+      expect(Cribbage::Card.new(6, :spades)).not_to be > Cribbage::Card.new(:jack, :diamonds)
     end
 
     it 'jack is higher than a number' do
-      expect(Cribbage::Card.new(:jack, :spaces)).to be > Cribbage::Card.new(6, :diamonds)
+      expect(Cribbage::Card.new(:jack, :spades)).to be > Cribbage::Card.new(6, :diamonds)
+    end
+
+    it '10 is not higher than a jack' do
+      expect(Cribbage::Card.new(10, :spades)).not_to be > Cribbage::Card.new(:jack, :diamonds)
+    end
+
+    it 'jack is higher than 10' do
+      expect(Cribbage::Card.new(:jack, :spades)).to be > Cribbage::Card.new(10, :diamonds)
     end
 
     it 'king is higher than a queen' do
-      expect(Cribbage::Card.new(:king, :spaces)).to be > Cribbage::Card.new(:queen, :diamonds)
+      expect(Cribbage::Card.new(:king, :spades)).to be > Cribbage::Card.new(:queen, :diamonds)
     end
 
     it 'queen is higher than a jack' do
-      expect(Cribbage::Card.new(:queen, :spaces)).to be > Cribbage::Card.new(:jack, :diamonds)
+      expect(Cribbage::Card.new(:queen, :spades)).to be > Cribbage::Card.new(:jack, :diamonds)
     end
   end
 
