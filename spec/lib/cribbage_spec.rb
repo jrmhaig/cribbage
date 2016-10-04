@@ -183,7 +183,18 @@ BOARD
   end
 
   context 'at the starter' do
-    # To do
+    let(:cribbage) { Cribbage.new }
+
+    before(:each) do
+      cribbage.proceed
+      cribbage.proceed
+    end
+
+    describe '#proceed' do
+      it 'moves from crib to starter' do
+        expect{cribbage.proceed}.to change(cribbage, :stage).from('The Starter').to('The Play')
+      end
+    end
   end
 
   context 'set the dealing player' do

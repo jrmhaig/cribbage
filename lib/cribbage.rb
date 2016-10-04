@@ -4,12 +4,13 @@ class Cribbage
   DEAL = 0
   CRIB = 1
   STARTER = 2
-  #PLAY = 3
+  PLAY = 3
   #SHOW = 4
   STAGES = [
     'The Deal',
     'The Crib',
-    'The Starter'
+    'The Starter',
+    'The Play'
   ]
 
   attr_reader :hand
@@ -128,6 +129,8 @@ CUT
       @starter = @deck.cards.sample
       @score[@dealer] += 2 if @starter.rank == :jack
       @stage = STARTER
+    when STARTER
+      @stage = PLAY
     end
   end
 
