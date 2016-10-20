@@ -31,12 +31,12 @@ class Cribbage
 
     # Cut for deal
     @initial_cut = []
-    a = @deck.cards[rand(52)]
-    b = @deck.cards[rand(52)]
+    a = @deck[rand(52)]
+    b = @deck[rand(52)]
     @initial_cut << [ a, b ]
     while a == b
-      a = @deck.cards[rand(52)]
-      b = @deck.cards[rand(52)]
+      a = @deck[rand(52)]
+      b = @deck[rand(52)]
       @initial_cut << [ a, b ]
     end
     @dealer = ( @initial_cut[-1][0] < @initial_cut[-1][1] ? 0 : 1 )
@@ -129,7 +129,7 @@ CUT
       end
       @stage = CRIB
     when CRIB
-      @starter = @deck.cards.sample
+      @starter = @deck.sample
       @score[@dealer] += 2 if @starter.rank == :jack
       @stage = STARTER
     when STARTER
@@ -183,8 +183,6 @@ PLAY
   #end
 
   def play card
-#require 'pry'
-#binding.pry
     if @hand[@to_play].include? card
       @to_play = 1 - @to_play
     else

@@ -112,15 +112,14 @@ BOARD
 
       context 'all jacks' do
         # Rig the deck
-        let(:rigged_deck) { Cribbage::Deck.new }
+        let(:rigged_deck) { Cribbage::Deck[
+          Cribbage::Card.new(:jack, :spades),
+          Cribbage::Card.new(:jack, :hearts),
+          Cribbage::Card.new(:jack, :diamonds),
+          Cribbage::Card.new(:jack, :clubs)
+        ] }
 
         before(:each) do
-          rigged_deck.instance_variable_set(:@cards, [
-            Cribbage::Card.new(:jack, :spades),
-            Cribbage::Card.new(:jack, :hearts),
-            Cribbage::Card.new(:jack, :diamonds),
-            Cribbage::Card.new(:jack, :clubs)
-          ])
           cribbage.instance_variable_set(:@deck, rigged_deck)
         end
 
@@ -147,15 +146,15 @@ BOARD
 
       context 'no jacks' do
         # Rig the deck
-        let(:rigged_deck) { Cribbage::Deck.new }
+        let(:rigged_deck) { Cribbage::Deck[
+          Cribbage::Card.new(2, :spades),
+          Cribbage::Card.new(4, :hearts),
+          Cribbage::Card.new(5, :diamonds),
+          Cribbage::Card.new(6, :clubs)
+        ] }
+
 
         before(:each) do
-          rigged_deck.instance_variable_set(:@cards, [
-            Cribbage::Card.new(2, :spades),
-            Cribbage::Card.new(4, :hearts),
-            Cribbage::Card.new(5, :diamonds),
-            Cribbage::Card.new(6, :clubs)
-          ])
           cribbage.instance_variable_set(:@deck, rigged_deck)
         end
 
@@ -235,8 +234,8 @@ BOARD
 
   context 'set the dealing player' do
     let(:cribbage) { Cribbage.new }
-    let(:first_card) { cribbage.instance_variable_get(:@deck).cards[0] }
-    let(:second_card) { cribbage.instance_variable_get(:@deck).cards[1] }
+    let(:first_card) { cribbage.instance_variable_get(:@deck)[0] }
+    let(:second_card) { cribbage.instance_variable_get(:@deck)[1] }
 
     context 'at the crib with player one dealing' do
       before(:each) do
