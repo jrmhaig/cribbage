@@ -5,18 +5,20 @@ class Cribbage
   CRIB = 1
   STARTER = 2
   PLAY = 3
-  #SHOW = 4
+  SHOW = 4
   STAGES = [
     'The Deal',
     'The Crib',
     'The Starter',
-    'The Play'
+    'The Play',
+    'The Show'
   ]
 
   attr_reader :hand
   attr_reader :round
   attr_reader :starter
   attr_reader :score
+  attr_reader :to_play
 
   def initialize
     @deck = Cribbage::Deck.new
@@ -38,6 +40,7 @@ class Cribbage
       @initial_cut << [ a, b ]
     end
     @dealer = ( @initial_cut[-1][0] < @initial_cut[-1][1] ? 0 : 1 )
+    @to_play = 1 - @dealer
     #@dealer = 1
   end
 
@@ -131,6 +134,8 @@ CUT
       @stage = STARTER
     when STARTER
       @stage = PLAY
+    when PLAY
+      @stage = SHOW
     end
   end
 
@@ -152,11 +157,38 @@ CUT
     h
   end
 
+  def display_play
+    h = <<PLAY
+    -----
+1: |     |
+   |     |
+    -----
+    -----
+2: |     |
+   |     |
+    -----
+PLAY
+  end
+
   def move_to_crib options
     p = options[:player]
     # From highest to lowest
     options[:cards].sort.reverse.each do |c|
       @hand[2] << @hand[p].delete_at(c-1)
+    end
+  end
+
+  #def to_play
+  #  1 - @dealer
+  #end
+
+  def play card
+#require 'pry'
+#binding.pry
+    if @hand[@to_play].include? card
+      @to_play = 1 - @to_play
+    else
+      false
     end
   end
 end

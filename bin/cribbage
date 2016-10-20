@@ -8,6 +8,15 @@ def wait_to_continue
   gets
 end
 
+def choose_card cards
+  i = 0
+  while i <= 0 or i > cards.length
+    print "1 - #{cards.length}> "
+    i = gets.to_i
+  end
+  cards[i-1]
+end
+
 peek = false
 
 cribbage = Cribbage.new
@@ -23,7 +32,7 @@ puts `clear`
 playing = true
 while playing
   # Possibly don't want this line here
-  cribbage.screen
+  #cribbage.screen
 
   #if cribbage.stage != 'The Deal'
   #  puts
@@ -69,6 +78,22 @@ while playing
   when 'The Starter'
     cribbage.screen
     puts "Two for his heels\n" if cribbage.starter.rank == :jack
+  when 'The Play'
+    while cribbage.hand[0].length > 0 && cribbage.hand[1].length > 0
+      cribbage.screen
+      puts cribbage.display_play
+      puts
+      puts "Your hand"
+      puts cribbage.display_hand(0)
+      if cribbage.to_play == 0
+        puts 'You to play'
+        card = choose_card(cribbage.hand[0])
+        cribbage.play(card)
+      else
+        puts 'Opponent to play'
+        cribbage.play(cribbage.hand[1].sample)
+      end
+    end
   else
     cribbage.screen
     puts "Not done yet!"

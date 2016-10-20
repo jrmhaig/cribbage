@@ -197,6 +197,42 @@ BOARD
     end
   end
 
+  context 'at the play' do
+    let(:cribbage) { Cribbage.new }
+
+    before(:each) do
+      cribbage.proceed
+      cribbage.proceed
+      cribbage.proceed
+    end
+
+    describe '#proceed' do
+      it 'moves from play to play' do
+        expect{cribbage.proceed}.to change(cribbage, :stage).from('The Play').to('The Show')
+      end
+    end
+
+    describe '#play' do
+      context 'turn of player 2' do
+        before(:each) do
+          cribbage.instance_variable_set(:@to_play, 1)
+        end
+
+        it 'makes it the turn of player 1' do
+          expect{cribbage.play(cribbage.hand[1].sample)}.to change(cribbage, :to_play).from(1).to 0
+        end
+
+        it 'fails with an invalid card' do
+          expect(cribbage.play(cribbage.hand[0].sample)).to be_falsey
+        end
+
+        it 'does not change to player 1 with invalid card' do
+          expect{cribbage.play(cribbage.hand[0].sample)}.not_to change(cribbage, :to_play)
+        end
+      end
+    end
+  end
+
   context 'set the dealing player' do
     let(:cribbage) { Cribbage.new }
     let(:first_card) { cribbage.instance_variable_get(:@deck).cards[0] }
